@@ -1,4 +1,5 @@
 ########################## BIKE EXAMPLE ##########################
+# test test
 
 file <- textConnection("S(BackTire,FrontTire):Tires
 P(BackBrake,FrontBrake):Brakes
