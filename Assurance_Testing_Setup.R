@@ -1,5 +1,4 @@
 ########################## BIKE EXAMPLE ##########################
-# test test
 
 file <- textConnection("S(BackTire,FrontTire):Tires
 P(BackBrake,FrontBrake):Brakes
@@ -14,7 +13,7 @@ S(Tires,Brakes):Bike")
 ## SIMPLER EXAMPLE ##
 # file <- textConnection("S(Tires, Brakes): Bike")
 
-## BEGIN CHECKS FOR FORMATTING##
+## BEGIN CHECKS FOR FORMATTING ##
 text=suppressWarnings(readLines(file))
 if(length(text)==0)stop("Text file contained 0 elements")
 text=stringr::str_replace_all(text, " ", "")
@@ -86,81 +85,6 @@ comps.in.parallel <- function(values) {
   result <- paste("(1 - (1 -", paste("(1 -", values, ")", collapse = ") * (1 -"), "))", sep = ' ')
   return(result)
 }
-
-# tmpList <- list() # POSSIBLY DELETE
-# priorList <- list() # POSSIBLY DELETE
-# dataList <- NULL # POSSIBLY DELETE
-
-done<-rep(F, length(text)) #Done matches up with the lines in variable text
-i=0
-oneChange=FALSE
-# Main loop
-# merging_function = ifelse(substr(text[1],1,1)%in%c("S", "s"), comps.in.series, comps.in.parallel)
-# compNeeded <- wordExtract(text[2])
-# first_component<- compNeeded[1]
-# first_component <- gsub("\"", "", first_component)
-# comp1<- get(compNeeded[1])
-# eval(parse(merging_function(compNeeded[1], compNeeded[2])))
-# where should I put the eval(parse()) part of the code?
-merging_function<- list()
-i <- 1 # POSSIBLY DELETE
-# component_variables <- list()
-# 
-# ##This will create the variables as their respective string names
-# for (name in words) {
-#   name <- gsub("^\\s+|\\s+$", "", name)
-#   component_variables[[name]] <- name
-# }
-# for (name in names(component_variables)) {
-#   assign(name, component_variables[[name]])
-# }
-
-# while(any(!done)){ # continues until at least one element in the 'done' vector is not true
-#   i=i+1 # increments i by one value fo reach iteration
-#   # Reset i if necessary
-#   if (i>length(text) &oneChange){
-#     i =1
-#     oneChange=FALSE
-#   }
-#   # Skip if done 
-#   if (done[i]) next
-#   
-#   #Extract component information
-#   compNeeded <- wordExtract(text[i])
-#   # Select merging function based on First character of text[i]
-#   merging_function=ifelse(substr(text[i],1,1)%in%c("S", "s"), comps.in.series, comps.in.parallel)
-#   # Get the name
-#   Name<-compNeeded[length(compNeeded)]
-#   compNeeded<-compNeeded[-length(compNeeded)]
-#   # Check if all components are ready
-#   if (all(compNeeded%in% ready)){
-#     ##We are ready to perform the computations needed in order to provide the prior for Name
-# 
-#     #This handles the case where there are more than two components in the list
-#   temp = tmpList[[compNeeded[[1]]]]
-#     for (j in 2:length(compNeeded)){
-#       temp<-(merging_function(temp, tmpList[[compNeeded[j]]]))
-#       #d<<-temp
-#       #if(compNeeded[j]=="generator7")skldf
-#     }
-#   
-#     # Store the results in priorList
-#     priorList[[Name]]<-temp
-# 
-#   needsBuilt<-setdiff(needsBuilt, Name)
-#   ready<-c(ready, Name)
-#   oneChange=TRUE
-#   done[i]<-TRUE
-#   output <- eval(parse(merging_function(compNeeded[i], compNeeded[i-1])))
-#   print(output)
-#   #   if (!is.null(dataList[[Name]])){
-#   #     tmpList[[Name]]<-(priorList[[Name]])
-#   #   }else{ #if there's no data to augment it, just pass the prior through as the posterior
-#   #     tmpList[[Name]]<-priorList[[Name]]
-#   #   }
-#   # }
-# }
-# }
 
 ## Store names as strings into their name as a variable
 component_variables <- list()
