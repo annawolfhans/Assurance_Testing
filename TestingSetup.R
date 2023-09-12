@@ -131,13 +131,22 @@ while (i <= length(text)) {
 duplicated_indices <- which(duplicated(words))
 duplicates <- words[duplicated_indices]
 ## This line ensures that it won't require the system name to be listed last. 
-system_name <- words[(max(duplicated_indices) +1)]
-system_name <- eval(parse(text = system_name))
-i = 1
-while (i < length(text)){
-  system_name <- gsub(duplicates[i], eval(merging_function[i]), system_name)
-  i = i+1
+if (length(duplicates) > 0) {
+  system_name <- words[(max(duplicated_indices) +1)]
+  system_name <- eval(parse(text = system_name))
+  i = 1
+  while (i < length(text)){
+    system_name <- gsub(duplicates[i], eval(merging_function[i]), system_name)
+    i = i+1
+  }
+} else { # this else statement should make it so if there's a simple function, 
+          # the last word (which should be the system name), is the system name
+  system_name <- words[length(words)]
+  system_name <- eval(parse(text = system_name))
 }
+
 ## This outputs our "equation 13". Our compressed equation.
 # I ALSO NEED TO GO BACK AND STORE THIS INTO BIKE NOT SYSTEM_NAME
-system_name
+# tmp <- eval(parse(text = words[length(words)])) 
+# tmp <- system_name
+# not sure if this line will be right - consult Dr. Warr
