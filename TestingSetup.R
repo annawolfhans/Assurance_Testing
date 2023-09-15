@@ -104,13 +104,13 @@ merging_function <- list()
 while (i <= length(text)) {
   compNeeded <- wordExtract(text[i])
   if (substr(text[i],1,1)%in%c("S", "s")) {
-    merging_function[[i]] <- comps.in.series(compNeeded[-length(text)])
+    merging_function[i] <- comps.in.series(compNeeded[-length(compNeeded)])
   } else { 
-    merging_function[[i]] <- comps.in.parallel(compNeeded[-length(text)])
+    merging_function[i] <- comps.in.parallel(compNeeded[-length(compNeeded)])
   }
   i <- i + 1
 }
-
+merging_function
 ## Store the equations into their respective subsystem names
 temp <- list()
 temporary <- list()
