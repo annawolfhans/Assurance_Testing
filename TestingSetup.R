@@ -98,19 +98,23 @@ for (name in names(component_variables)) {
   assign(name, component_variables[[name]])
 }
 
+subsystem_names <- component_variables[(length(component_variables) - length(text) + 1):length(component_variables)]
 ## Set up our series and parallel equations
 i = 1
 merging_function <- list()
 while (i <= length(text)) {
   compNeeded <- wordExtract(text[i])
   if (substr(text[i],1,1)%in%c("S", "s")) {
-    merging_function[i] <- comps.in.series(compNeeded[-length(compNeeded)])
+    merging_function[[i]] <- comps.in.series(compNeeded[-length(compNeeded)])
   } else { 
-    merging_function[i] <- comps.in.parallel(compNeeded[-length(compNeeded)])
+    merging_function[[i]] <- comps.in.parallel(compNeeded[-length(compNeeded)])
   }
   i <- i + 1
 }
 merging_function
+names(merging_function) <- subsystem_names
+
+# may not need this code? unsure 
 ## Store the equations into their respective subsystem names
 temp <- list()
 temporary <- list()
@@ -122,6 +126,20 @@ while (i <= length(text)) {
   eval(parse(text = temporary[i]))
   i = i+1
 }
+
+replace_variables <- function(expression, values) {
+  for (var in names(values)) {
+    expression <- gsub(var, values[[var]], expression)
+  }
+  return(expression)
+}
+
+for (name in names(merging_function)) {
+  merging_function[[name]] <- replace_variables(merging_function[[name]], merging_function)
+}
+
+# Print the updated merging_function
+print(merging_function)
 
 ## Identify duplicate values to recognize components and subcomponents
 # I need to make sure 1. this will work if there's a simpler option (no duplicates)
