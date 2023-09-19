@@ -5,10 +5,10 @@ P(BackBrake,FrontBrake):Brakes
 S(Tires,Brakes):Bike")
 
 ## MORE COMPLEX EXAMPLE ##
-# file <- textConnection("S(BackTire,FrontTire):Tires
-# P(BackBrake,FrontBrake):Brakes
-# P(Electric, Self): Power
-# S(Tires,Brakes):Bike")
+file <- textConnection("S(BackTire,FrontTire):Tires
+P(BackBrake,FrontBrake):Brakes
+P(Electric, Self): Power
+S(Tires,Brakes,Power):Bike")
 
 ## SIMPLER EXAMPLE ##
 # file <- textConnection("S(Tires, Brakes): Bike")
@@ -88,7 +88,6 @@ comps.in.parallel <- function(values) {
 
 ## Store names as strings into their name as a variable
 component_variables <- list()
-words<-wordExtract(text) # POSSIBLY DELETE
 
 for (name in words) {
   name <- gsub("^\\s+|\\s+$", "", name)
@@ -111,25 +110,13 @@ while (i <= length(text)) {
   }
   i <- i + 1
 }
-merging_function
+# merging_function
 names(merging_function) <- subsystem_names
-
-# may not need this code? unsure 
-## Store the equations into their respective subsystem names
-temp <- list()
-temporary <- list()
-i = 1
-while (i <= length(text)) {
-  compNeeded <- wordExtract(text[i])
-  temp[i] <- paste(merging_function[i])
-  temporary[i] <- paste0(compNeeded[length(text)], " = temp[", i, "]")
-  eval(parse(text = temporary[i]))
-  i = i+1
-}
 
 replace_variables <- function(expression, values) {
   for (var in names(values)) {
-    expression <- gsub(var, values[[var]], expression)
+    # Use \\b to match whole words only
+    expression <- gsub(paste0("\\b", var, "\\b"), values[[var]], expression)
   }
   return(expression)
 }
@@ -138,35 +125,7 @@ for (name in names(merging_function)) {
   merging_function[[name]] <- replace_variables(merging_function[[name]], merging_function)
 }
 
-# Print the updated merging_function
+## Print the updated merging_function
 print(merging_function)
 
-## Identify duplicate values to recognize components and subcomponents
-# I need to make sure 1. this will work if there's a simpler option (no duplicates)
-# 2. a more complex three subsystem system will also work
 
-
-duplicated_indices <- which(duplicated(words))
-duplicates <- words[duplicated_indices]
-## This line ensures that it won't require the system name to be listed last. 
-if (length(duplicates) > 0) {
-  system_name <- words[(max(duplicated_indices) +1)]
-  system_name <- eval(parse(text = system_name))
-  i = 1
-  while (i < length(text)){
-    system_name <- gsub(duplicates[i], eval(merging_function[i]), system_name)
-    i = i+1
-  }
-} else { # this else statement should make it so if there's a simple function, 
-          # the last word (which should be the system name), is the system name
-  system_name <- words[length(words)]
-  system_name <- eval(parse(text = system_name))
-}
-
-## This outputs our "equation 13". Our compressed equation.
-# I ALSO NEED TO GO BACK AND STORE THIS INTO BIKE NOT SYSTEM_NAME
-# tmp <- eval(parse(text = words[length(words)])) 
-# tmp <- system_name
-# not sure if this line will be right - consult Dr. Warr
-
-system_name
