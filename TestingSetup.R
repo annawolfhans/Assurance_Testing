@@ -13,15 +13,21 @@ S(Tires,Brakes,Power):Bike")
 ## SIMPLER EXAMPLE ##
 file <- textConnection("S(Tires, Brakes): Bike")
 
+## EXAMPLE WITH PRIORS - note that additional checks with priors are still needed ##
+file <- textConnection("S(FrontBrakes<- c(8,8), BackBrakes <- c(4,4)):Brakes <- c(4,5)")
+
 assurance_testing_setup <- function(file){
 ## BEGIN CHECKS FOR FORMATTING ##
-text=suppressWarnings(readLines(file))
-if(length(text)==0)stop("Text file contained 0 elements")
-text=stringr::str_replace_all(text, " ", "")
+rbd_text=suppressWarnings(readLines(file))
+if(length(rbd_text)==0)stop("Text file contained 0 elements")
+rbd_text=stringr::str_replace_all(rbd_text, " ", "")
 
-## Checks to see if valid
-if(!all(stringr::str_sub(text, 1, 2) %in% c('p(', 'P(', 's(', 'S(')))stop("All expressions must start with P( or S(")
+## Checks to see if begins with P or S
+if(!all(stringr::str_sub(rbd_text, 1, 2) %in% c('p(', 'P(', 's(', 'S(')))stop("All expressions must start with P( or S(")
 
+## Remove <-c(#,#) information from the text
+text <- gsub("<-c\\([^)]+\\)", "", rbd_text)
+# from here on out, rbd_text will include prior information, text will not
 
 ## Makes sure the pattern after the opening parenthesis is #,#,#,....):#
 if(!(all(stringr::str_detect(stringr::str_sub(text, 3),
@@ -38,6 +44,26 @@ wordExtract <- function(string){
 }
 
 words<-wordExtract(text)
+
+## Extract priors and put in alpha and beta vectors
+
+Numextract <- function(string){
+  unlist(regmatches(string,gregexpr("[[:digit:]]+\\.*[[:digit:]]*",string)))
+}
+
+priors <- as.integer(Numextract(rbd_text))
+alpha <- numeric(0)
+beta <- numeric(0)
+
+for (i in seq_along(priors)) {
+  if (i %% 2 == 1) {
+    alpha <- c(alpha, priors[i])
+  } else {
+    beta <- c(beta, priors[i])
+  }
+}
+# alpha
+# beta
 
 ## The first time through we will see if it is logically defined
 ## The 2nd time through we will perform the computations
@@ -131,3 +157,6 @@ print(merging_function)
 }
 
 assurance_testing_setup(file)
+
+##---------- how should I store the priors with this list?------##
+
