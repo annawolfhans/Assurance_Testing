@@ -11,8 +11,9 @@ P(Electric, Self): Power
 S(Tires,Brakes,Power):Bike")
 
 ## SIMPLER EXAMPLE ##
-# file <- textConnection("S(Tires, Brakes): Bike")
+file <- textConnection("S(Tires, Brakes): Bike")
 
+assurance_testing_setup <- function(file){
 ## BEGIN CHECKS FOR FORMATTING ##
 text=suppressWarnings(readLines(file))
 if(length(text)==0)stop("Text file contained 0 elements")
@@ -127,5 +128,6 @@ for (name in names(merging_function)) {
 
 ## Print the updated merging_function
 print(merging_function)
+}
 
-
+assurance_testing_setup(file)
