@@ -14,7 +14,10 @@ S(Tires,Brakes,Power):Bike")
 file <- textConnection("S(Tires, Brakes): Bike")
 
 ## EXAMPLE WITH PRIORS - note that additional checks with priors are still needed ##
-file <- textConnection("S(FrontBrakes<- c(8,8), BackBrakes <- c(4,4)):Brakes <- c(4,5)")
+file <- textConnection("S(FrontBrakes<- c(8,8), BackBrakes <- c(4,4)):Brakes")
+file <- textConnection("S(BackTire<- c(1,2),FrontTire<- c(3,4)):Tires
+P(BackBrake<- c(7,8),FrontBrake<- c(9,8)):Brakes
+S(Tires,Brakes):Bike")
 
 assurance_testing_setup <- function(file){
 ## BEGIN CHECKS FOR FORMATTING ##
@@ -62,6 +65,10 @@ for (i in seq_along(priors)) {
     beta <- c(beta, priors[i])
   }
 }
+# Name items of the list 
+# priorparams$FrontBrake 8 8 
+# or FrontBrakes$alpha 8
+# FrontBrakes$beta 8
 # alpha
 # beta
 
@@ -159,4 +166,19 @@ print(merging_function)
 assurance_testing_setup(file)
 
 ##---------- how should I store the priors with this list?------##
+#BikeReliability function
+# given numbers for each of the component pieces, can I give the numbers for this system
+# eval(parse(text= PASTE THIS STUFF
+# "BikeReliabiltiy<- function(# four components and u know their names#){
+  # eval(parse(text=# mergingfunction$Bike))
+#}"
 
+BikeReliability <- function(BackTire, FrontTire, BackBrake, FrontBrake
+){
+  eval(parse(text = merging_function$Bike))
+}
+
+evaluate <- setdiff(words, compNeeded)
+BikeReliability(BackTire = 1, FrontTire = 2, BackBrake=4, FrontBrake=4)
+
+  # then include prior information
