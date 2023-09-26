@@ -179,6 +179,14 @@ BikeReliability <- function(BackTire, FrontTire, BackBrake, FrontBrake
 }
 
 evaluate <- setdiff(words, compNeeded)
-BikeReliability(BackTire = 1, FrontTire = 2, BackBrake=4, FrontBrake=4)
+BikeReliability(BackTire = 1, FrontTire = 2, BackBrake=2, FrontBrake=4)
 
-  # then include prior information
+stored <- list()
+i <- 1  
+while (i <= length(evaluate)) {
+  stored[[i]] <- paste0(evaluate[i], "=", alpha[i])
+  i <- i + 1  
+}
+# Right now, it's just putting in alpha but it is outputting a number which is good!! 
+result <- paste("BikeReliability(", paste(stored, collapse = ", "), ")")
+eval(parse(text = result))
