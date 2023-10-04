@@ -18,6 +18,13 @@ file <- textConnection("S(FrontBrakes<- c(8,8), BackBrakes <- c(4,4)):Brakes")
 file <- textConnection("S(BackTire<- c(1,2),FrontTire<- c(3,4)):Tires
 P(BackBrake<- c(7,8),FrontBrake<- c(9,8)):Brakes
 S(Tires,Brakes):Bike")
+file <- textConnection("S(BackTire:(1,2):T:$1:, FrontTire:(1,2):T:$1:), Tires")
+
+file <- textConnection("S(BackTire:prior=beta(1,2):TRUE:$1:, FrontTire:prior=beta(1,2):TRUE:$1:), Tires
+P(BackBrake:prior=beta(1,2):TRUE:$1:, FrontBrake:prior=beta(1,2):TRUE:$1:), Brakes
+S(Tires:prior=beta(1,2):TRUE:$1:, Brakes:prior=beta(1,2):TRUE:$1:), Bike")
+# make sure it pulls first word separated by comma 
+# If there's priors, it's a component
 
 assurance_testing_setup <- function(file){
 ## BEGIN CHECKS FOR FORMATTING ##
@@ -165,22 +172,19 @@ print(merging_function)
 
 assurance_testing_setup(file)
 
-##---------- how should I store the priors with this list?------##
-#BikeReliability function
-# given numbers for each of the component pieces, can I give the numbers for this system
-# eval(parse(text= PASTE THIS STUFF
-# "BikeReliabiltiy<- function(# four components and u know their names#){
-  # eval(parse(text=# mergingfunction$Bike))
-#}"
-
+### ENSURE THIS CAN PERFORM CALCULATIONS ### 
+# change it so line 170 is dynamic instead 
+# BikeReliability pasted with line 173 text, then eval parse the whole thing
+# system name should only be used once, you can use that fact s
 BikeReliability <- function(BackTire, FrontTire, BackBrake, FrontBrake
 ){
   eval(parse(text = merging_function$Bike))
 }
 
 evaluate <- setdiff(words, compNeeded)
-BikeReliability(BackTire = 1, FrontTire = 2, BackBrake=2, FrontBrake=4)
+BikeReliability(BackTire = 0.8, FrontTire = 0.7, BackBrake=.6, FrontBrake=.5)
 
+# lines below should become irrelevant 
 stored <- list()
 i <- 1  
 while (i <= length(evaluate)) {
