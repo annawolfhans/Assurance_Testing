@@ -29,7 +29,7 @@ wordExtract <- function(string){
   matches <- str_extract_all(text, pattern)
   result_string <-""
   for (match_list in matches) {
-    for (match in match_list) {,
+    for (match in match_list) {
      result_string <- paste(result_string, match)
     }
   }
@@ -75,3 +75,16 @@ priorsExtract(text)
 
 # running into problem from before - how should I use this moving forward. 
 # I could perform the sampling and store into their respective variable names? 
+
+trueFalseTestExtract <- function(string) {
+  pattern <- "test=([a-zA-Z]+)"
+  matches <- str_extract_all(string, pattern)
+  if (length(matches) > 0) {
+    extracted_words <- unlist(matches)
+    return(extracted_words)
+  } else {
+    return(NULL)
+  }
+}
+trueFalseTestExtract(text)
+# I could also remove "test=" from the output, but that may not matter just yet
