@@ -18,59 +18,58 @@ file <- textConnection("S(FrontBrakes<- c(8,8), BackBrakes <- c(4,4)):Brakes")
 file <- textConnection("S(BackTire<- c(1,2),FrontTire<- c(3,4)):Tires
 P(BackBrake<- c(7,8),FrontBrake<- c(9,8)):Brakes
 S(Tires,Brakes):Bike")
-file <- textConnection("S(BackTire:(1,2):T:$1:, FrontTire:(1,2):T:$1:), Tires")
 
-file <- textConnection("S(BackTire:prior=beta(1,2):TRUE:$1:, FrontTire:prior=beta(1,2):TRUE:$1:), Tires
-P(BackBrake:prior=beta(1,2):TRUE:$1:, FrontBrake:prior=beta(1,2):TRUE:$1:), Brakes
-S(Tires:prior=beta(1,2):TRUE:$1:, Brakes:prior=beta(1,2):TRUE:$1:), Bike")
 # make sure it pulls first word separated by comma 
 # If there's priors, it's a component
 
 assurance_testing_setup <- function(file){
-## BEGIN CHECKS FOR FORMATTING ##
-rbd_text=suppressWarnings(readLines(file))
-if(length(rbd_text)==0)stop("Text file contained 0 elements")
-rbd_text=stringr::str_replace_all(rbd_text, " ", "")
+  
+  ## BEGIN CHECKS FOR FORMATTING ##
+  rbd_text=suppressWarnings(readLines(file))
+  if(length(rbd_text)==0)stop("Text file contained 0 elements")
+  rbd_text=stringr::str_replace_all(rbd_text, " ", "")
 
-## Checks to see if begins with P or S
-if(!all(stringr::str_sub(rbd_text, 1, 2) %in% c('p(', 'P(', 's(', 'S(')))stop("All expressions must start with P( or S(")
+  if(length(rbd_text)==0)stop("Text file contained 0 elements")
 
-## Remove <-c(#,#) information from the text
-text <- gsub("<-c\\([^)]+\\)", "", rbd_text)
-# from here on out, rbd_text will include prior information, text will not
-
-## Makes sure the pattern after the opening parenthesis is #,#,#,....):#
-if(!(all(stringr::str_detect(stringr::str_sub(text, 3),
-                             pattern = "^([a-zA-Z0-9]+,)+[a-zA-Z0-9]+\\):[a-zA-Z0-9]+$"))))
-  stop("One or more strings did not meet grammar requirements (eg. P(V1,V2,V3):P1)")
-
-## http://stla.github.io/stlapblog/posts/Numextract.html
-wordExtract <- function(string){
-  middle=stringr::str_sub(stringr::str_extract(string,
-                                               '\\([a-zA-Z0-9,]+\\)'),2,-2)
-  middleWords<-unlist(strsplit(middle, ','))
-  endWord=stringr::str_sub(stringr::str_extract(string, ":[a-zA-Z0-9]+"), 2, -1)
-  return(c(middleWords, endWord))
-}
-
-words<-wordExtract(text)
-
-## Extract priors and put in alpha and beta vectors
-
-Numextract <- function(string){
-  unlist(regmatches(string,gregexpr("[[:digit:]]+\\.*[[:digit:]]*",string)))
-}
-
-priors <- as.integer(Numextract(rbd_text))
-alpha <- numeric(0)
-beta <- numeric(0)
-
-for (i in seq_along(priors)) {
-  if (i %% 2 == 1) {
-    alpha <- c(alpha, priors[i])
-  } else {
-    beta <- c(beta, priors[i])
+  ## Checks to see if begins with P or S
+  if(!all(stringr::str_sub(rbd_text, 1, 2) %in% c('p(', 'P(', 's(', 'S(')))stop("All expressions must start with P( or S(")
+  
+  ## Remove <-c(#,#) information from the text
+  text <- gsub("<-c\\([^)]+\\)", "", rbd_text)
+  # from here on out, rbd_text will include prior information, text will not
+  
+  ## Makes sure the pattern after the opening parenthesis is #,#,#,....):#
+  if(!(all(stringr::str_detect(stringr::str_sub(text, 3),
+                               pattern = "^([a-zA-Z0-9]+,)+[a-zA-Z0-9]+\\):[a-zA-Z0-9]+$"))))
+    stop("One or more strings did not meet grammar requirements (eg. P(V1,V2,V3):P1)")
+  
+  ## http://stla.github.io/stlapblog/posts/Numextract.html
+  wordExtract <- function(string){
+    middle=stringr::str_sub(stringr::str_extract(string,
+                                                 '\\([a-zA-Z0-9,]+\\)'),2,-2)
+    middleWords<-unlist(strsplit(middle, ','))
+    endWord=stringr::str_sub(stringr::str_extract(string, ":[a-zA-Z0-9]+"), 2, -1)
+    return(c(middleWords, endWord))
   }
+  
+  words<-wordExtract(text)
+  
+  ## Extract priors and put in alpha and beta vectors
+  
+  Numextract <- function(string){
+    unlist(regmatches(string,gregexpr("[[:digit:]]+\\.*[[:digit:]]*",string)))
+  }
+  
+  priors <- as.integer(Numextract(rbd_text))
+  alpha <- numeric(0)
+  beta <- numeric(0)
+  
+  for (i in seq_along(priors)) {
+    if (i %% 2 == 1) {
+      alpha <- c(alpha, priors[i])
+    } else {
+      beta <- c(beta, priors[i])
+    }
 }
 # Name items of the list 
 # priorparams$FrontBrake 8 8 
