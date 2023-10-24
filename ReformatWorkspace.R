@@ -159,62 +159,93 @@ if(length(samp) == 0){
 # Rewrite WordExtract code
 # Create a connection to the text data
 file <- textConnection(
-"BIKE: series
+"BIKE::PARALLEL
 Tires: cost=$33
 Brakes: cost=$45
 Power: cost=$12
 
-Tires: series
+Tires::Series
 BackTire: B(1,2), cost=$12
 FrontTire: B(1,2), cost=$12
 
-Brakes: parallel
-FrontBrakes: B(1,2), cost=$12
-BackBrakes: B(1,2), cost=$Inf
+Brakes::parallel
+FrontBrakes: B(3,2), cost=$12
+BackBrakes: B(1,4), cost=$Inf
 
-Power: parallel
-FrontBrakes: B(1,2), cost=$12
-BackBrakes: B(1,2), cost=$Inf")
+Power::parallel
+Pedaling: B(1,2), cost=$12
+Electric: B(1,2), cost=$Inf")
 
 # Read the lines from the connection 
 # IF use textConnection great. If not, make it work
 #### come back to this - problem is that it splits it into separate strings ####
-readInput <- function(file){
-  if (inherits(file, "textConnection")){
-    text <- suppressWarnings(readLines(file))
-    close(file)
-  }
-  else if (is.character(file)) {
-    text <- suppressWarnings(readLines(file))
-  }
-  else {
-    stop("Input type not recognized. It should be a textConnection or character vector with file paths.")
-  }
-  return(text)
-}
+# process_text_data <- function(data_input) {
+#   if (inherits(data_input, "textConnection")) {
+#     text <- readLines(data_input)
+#   } else if (file.exists(data_input)) {
+#     text <- readLines(data_input)
+#   } else {
+#     stop("Input must be a textConnection object or a valid file path.")
+#   }
+#   
+#   # Process the text data here or perform any desired operations
+#   # For example, you can print the lines of text:
+#   # cat(text_data, sep = "\n")
+# }
+# 
+# process_text_data(file)
 
 #### continue ####
 text <- suppressWarnings(readLines(file))
+if(length(text)==0)stop("Text file contained 0 elements")
 
-# Close the connection
-close(file)
+## Checks to see if includes parallel or series relationship after::
+# CASE INSENSITIVE
+# pattern says it can't have a space - maybe specify in text or build a warning for it? 
 
-# Initialize an empty data frame
+
+for (sentence in text) {
+  if (stringr::str_count(sentence, "::") == 1) {
+    if (!grepl("(?i)::(parallel|series)", sentence)) {
+      cat("Error: The sentence does not match the pattern: '", sentence, "'\n")
+      stop("Pattern not found in the sentence.")
+    }
+  }
+}
+
+# Close the connection?
+# close(file)
+
+
 data <- data.frame(Word = character(0))
-
 # Extract the words on the left side of the colons and ignore lines with NA
 for (line in text) {
-  match <- regmatches(line, regexec("^(.*?):", line))
+  match <- regmatches(line, regexec("^(.*?)::", line))
   if (length(match) > 0) {
     data <- rbind(data, data.frame(Word = match[[1]][2]))
   }
 }
 
-# Remove NAs from the data frame
-words <- data[!is.na(data$Word), ]
+# Remove NAs from the data frame that come from the spaces
+needsBuilt <- data[!is.na(data$Word), ]
+needsBuilt
 
-# Print the data frame
-words
+data1 <- data.frame(Word = character(0))
+# Extract the words on the left side of the colons and ignore lines with NA
+for (line in text) {
+  match <- regmatches(line, regexec("^(.*?):", line))
+  if (length(match) > 0) {
+    data1 <- rbind(data1, data.frame(Word = match[[1]][2]))
+  }
+}
+words <- data1[!is.na(data1$Word), ]
+remove_colons <- function(input_string) {
+  cleaned_string <- gsub(":", "", input_string)
+  return(cleaned_string)
+}
+(words <- remove_colons(words))
+ready <- setdiff(words, needsBuilt)
+## MAKE SURE THE SUBSYSTEM PIECES HAVE THEIR INFO INCLUDED
 
 line_count <- 0
 
@@ -225,7 +256,7 @@ for (line in text) {
   }
   line_count <- line_count + 1
 }
-# Write a code to make sure the components in the first estrofa are listed again
+# Write a code to make sure the components in the first section are listed again
 line_count
 words
 
@@ -238,4 +269,51 @@ for (i in 2:line_count) {
     stop("Error: Subcomponent '", word_to_check, "' does not have its component information provided.")
   }
 }
+
+
+## Based on B( , )
+priorsExtract <- function(string) {
+  pattern <- "B\\((\\d+),(\\d+)\\)"
+  matches <- stringr::str_match_all(string, pattern)
+  if (length(matches) > 0) {
+    extracted_numbers <- matches[[1]][, 2:3]
+    return(extracted_numbers)
+  } else {
+    return(NULL)
+  }
+}
+text <- paste(text, collapse = " ")
+priors <- priorsExtract(text)
+colnames(priors) <- c("alpha", "beta")
+priors
+
+## Check to make sure all components only appear once on the LHS of the relations (enforce that data not used twice)
+counts<-table(words)
+countIndices<-names(counts)%in% names(table(needsBuilt))
+if(any(counts[countIndices]>2) | !all(counts[!countIndices]==1))
+  stop("Component names must be unique on LHS of equations")
+
+## Check for circular relationship
+done<-rep(F, line_count)
+i=0
+oneChange=FALSE
+while(any(!done)){
+  i=i+1
+  if (i > line_count &!oneChange)stop("The diagram specified contains circular relationships that makes the model impossible")
+  else if (i>line_count &oneChange){
+    i =1
+    oneChange=FALSE
+  }
+  if (done[i]) next
+  compNeeded <- words[i]
+  Name<-compNeeded[length(compNeeded)]
+  compNeeded<-compNeeded[-length(compNeeded)]
+  if (all(compNeeded%in% ready)){
+    needsBuilt<-setdiff(needsBuilt, Name)
+    ready<-c(ready, Name)
+    oneChange=TRUE
+    done[i]<-TRUE
+  }
+}
+
 

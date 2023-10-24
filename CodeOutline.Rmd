@@ -21,9 +21,12 @@ User provides the following information:
 # MAIN FUNCTION #
 
 - Warnings with STOP:
-  - Must begin with xyz
+  - Must begin with 
   - Contain series or parallel relationship
   - Require order to be system, subsystems, components (not sure how to build a warning here)
+    - Listed once AND first should be system, listed twice should be subsystems, listed once AND not first should be components
+    - Subsystem or component names should not have a number in them. (otherwise, cost and priors will get confused in code)
+    - There should be no reason that any name is listed more than twice - correct? <!-- double check on this. there shouldn't be an interconnected system -->
   - No circular relationships
   - Formatting and grammar requirements
   - Unique definitions
