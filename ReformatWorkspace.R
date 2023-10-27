@@ -1,6 +1,6 @@
 #### EXAMPLE FILE ####
 file <- textConnection(
-"BIKE::PARALLEL
+"BIKE::PARALLEL:cost=$1999
 Tires: cost=$33
 Brakes: cost=$45
 Power: cost=$12
@@ -21,7 +21,7 @@ Electric: B(1,2), cost=$Inf")
 # Read the lines from the connection 
 # IF use textConnection great. If not, make it work
 #### come back to this - problem is that it splits it into separate strings ####
-file_path <- path.expand("~/file.txt")
+file_path <- path.expand("~/Research2023/Assurance_Testing/file.txt")
 file_path <- as.character(file_path)  # Ensure it's a character string
 
 processInput <- function(input_source) {
@@ -36,6 +36,14 @@ processInput <- function(input_source) {
 }
 
 processInput(file_path)
+processInput(file_path)
+
+#create a variable called file that's either textConnection or
+# a string to the path of a file
+# test is this a textConnection or a string
+# If it's a string then you would go out and read the file
+# even like read_csv (but requires tidyverse, so it would be better to use baseR) or readLines (best)
+# needs to be formatted EXACTLy like you want it to be
 
 #### BEGIN WARNINGS/PULLING INFORMATION #### 
 
@@ -79,6 +87,7 @@ for (line in text) {
     data1 <- rbind(data1, data.frame(Word = match[[1]][2]))
   }
 }
+
 words <- data1[!is.na(data1$Word), ]
 remove_colons <- function(input_string) {
   cleaned_string <- gsub(":", "", input_string)
@@ -131,19 +140,23 @@ priors
 
 #### EXTRACT COST ####
 costExtract <- function(string) {
-  pattern <- "\\(\\d+,\\d+\\), cost=\\$(\\d+|Inf)"
+  pattern <- "\\$([0-9]+|Inf)"
   matches <- stringr::str_match_all(string, pattern)
   
   if (length(matches) > 0) {
     extracted_numbers <- as.numeric(matches[[1]][, 2])
     return(extracted_numbers)
   } else {
-    return(NULL)
+    stop("No cost values were found. Check costs formatting.")
   }
 }
 text <- paste(text, collapse = " ")
 costs <- costExtract(text)
-costs
+sys_only_price <- costs[1]
+## First cost should be sys_only_price
+costs <- costs[-1]
+
+# <!--- eventually I may want to break up the costs for subsystem vs components -->
 
 ## Check to make sure all components only appear once on the LHS of the relations (enforce that data not used twice)
 counts<-table(words)

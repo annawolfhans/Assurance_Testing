@@ -21,16 +21,16 @@ User provides the following information:
 # MAIN FUNCTION #
 
 - Warnings with STOP:
-  - Must begin with 
+  <!-- - Must begin with (might not apply now that I changed the formatting) -->
   - Contain series or parallel relationship
   - Require order to be system, subsystems, components (not sure how to build a warning here)
     - Listed once AND first should be system, listed twice should be subsystems, listed once AND not first should be components
     - Subsystem or component names should not have a number in them. (otherwise, cost and priors will get confused in code)
-    - There should be no reason that any name is listed more than twice - correct? <!-- double check on this. there shouldn't be an interconnected system -->
+    - There should be no reason that any name is listed more than twice - correct? <!--double check on this. there shouldn't be an interconnected system -->
   - No circular relationships
   - Formatting and grammar requirements
   - Unique definitions
-  - Make sure that subcomponents have different component names, otherwise it won't work (I think explicitly tell them this one, bc it relies on duplicate words)
+  - Make sure that subcomponents have different component names, otherwise it won't work (I think explicitly tell them this one, bc it relies on duplicate words. And no numbers in the words. So as of right now they couldn't do something like Component1 Component2)
 
 - Internal workings the users don't need to see:
   - Test Score (to establish a preference for one test over another)

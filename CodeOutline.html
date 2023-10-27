@@ -383,14 +383,27 @@ no cost is listed, code will create value of $Inf</li>
 <h1>MAIN FUNCTION</h1>
 <ul>
 <li>Warnings with STOP:
+<!-- - Must begin with (might not apply now that I changed the formatting) -->
 <ul>
-<li>Must begin with xyz</li>
 <li>Contain series or parallel relationship</li>
 <li>Require order to be system, subsystems, components (not sure how to
-build a warning here)</li>
+build a warning here)
+<ul>
+<li>Listed once AND first should be system, listed twice should be
+subsystems, listed once AND not first should be components</li>
+<li>Subsystem or component names should not have a number in them.
+(otherwise, cost and priors will get confused in code)</li>
+<li>There should be no reason that any name is listed more than twice -
+correct?
+<!--double check on this. there shouldn't be an interconnected system --></li>
+</ul></li>
 <li>No circular relationships</li>
 <li>Formatting and grammar requirements</li>
 <li>Unique definitions</li>
+<li>Make sure that subcomponents have different component names,
+otherwise it won’t work (I think explicitly tell them this one, bc it
+relies on duplicate words. And no numbers in the words. So as of right
+now they couldn’t do something like Component1 Component2)</li>
 </ul></li>
 <li>Internal workings the users don’t need to see:
 <ul>
