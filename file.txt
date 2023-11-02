@@ -1,0 +1,18 @@
+
+"BIKE::PARALLEL
+Tires: cost=$33
+Brakes: cost=$45
+Power: cost=$12
+
+Tires::Series
+BackTire: B(1,2), cost=$12
+FrontTire: B(1,2), cost=$12
+
+Brakes::parallel
+FrontBrakes: B(3,2), cost=$12
+BackBrakes: B(1,4), cost=$Inf
+
+Power::parallel
+Pedaling: B(1,2), cost=$12
+Electric: B(1,2), cost=$Inf"
+

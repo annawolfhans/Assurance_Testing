@@ -1,6 +1,6 @@
 #### EXAMPLE FILE ####
 file <- textConnection(
-"BIKE::PARALLEL:cost=$1999
+"BI2KE::PARALLEL:cost=$1999
 Tires: cost=$33
 Brakes: cost=$45
 Power: cost=$12
@@ -18,34 +18,25 @@ Pedaling: B(1,2), cost=$12
 Electric: B(1,2), cost=$Inf")
 
 #### ACCEPT EITHER TEXTCONNECTION() OR .TXT FILE ####
-# Read the lines from the connection 
-# IF use textConnection great. If not, make it work
-#### come back to this - problem is that it splits it into separate strings ####
-file_path <- path.expand("~/Research2023/Assurance_Testing/file.txt")
-file_path <- as.character(file_path)  # Ensure it's a character string
 
-processInput <- function(input_source) {
-  if (inherits(input_source, "textConnection")) {
-    input_string <- paste(readLines(input_source), collapse = " ")
-  } else if (file.exists(input_source)) {
-    input_string <- paste(readLines(input_source), collapse = " ")
-  } else {
-    stop("Invalid input source. Please provide a valid textConnection or file path.")
-  }
-  print(input_string)
+current_dir <- getwd()
+file_name <- "file.txt"  
+file_path <- file.path(current_dir, file_name)
+
+if (file.exists(file_path)) {
+  # File exists, read it using readLines
+  text <- suppressWarnings(readLines(file_path))
+  print("File read in as a file_path")
+} else {
+  # File doesn't exist, create a textConnection
+  #text_con <- textConnection(file)
+  text <- suppressWarnings(readLines(file))
+  print("File read in as a text_connection")
 }
 
-processInput(file_path)
-processInput(file_path)
-
-#create a variable called file that's either textConnection or
-# a string to the path of a file
-# test is this a textConnection or a string
-# If it's a string then you would go out and read the file
-# even like read_csv (but requires tidyverse, so it would be better to use baseR) or readLines (best)
-# needs to be formatted EXACTLy like you want it to be
 
 #### BEGIN WARNINGS/PULLING INFORMATION #### 
+assurance_testing_setup <- function(file){
 
 text <- suppressWarnings(readLines(file))
 if(length(text)==0)stop("Text file contained 0 elements")
@@ -97,6 +88,20 @@ remove_colons <- function(input_string) {
 ready <- setdiff(words, needsBuilt)
 ## MAKE SURE THE SUBSYSTEM PIECES HAVE THEIR INFO INCLUDED
 
+## WRITE WARNING FOR NON-PERMITABLE CHARACTERS IN THE WORDS
+check_invalid_characters <- function(word) {
+  invalid_chars <- c("@", "#", "$", "%")
+  if (any(sapply(invalid_chars, function(char) grepl(char, word)))) {
+    cat("Invalid character detected in word:", word, "\n")
+    stop("Invalid character found.")
+  }
+}
+
+# Loop through the 'words' vector and check for invalid characters
+for (word in words) {
+  check_invalid_characters(word)
+}
+
 line_count <- 0
 
 # Iterate through the lines to count lines before a new line
@@ -110,6 +115,7 @@ for (line in text) {
 line_count
 words
 
+i <- 1
 # Iterate through the elements in words
 for (i in 2:line_count) {
   word_to_check <- words[i]
@@ -187,4 +193,57 @@ while(any(!done)){
   }
 }
 
+## Series and parallel structure functions ##
+comps.in.series <- function(values) {
+  result <- paste("(", paste(values, collapse = " * "), ")", sep = ' ')
+  return(result)
+}
+
+comps.in.parallel <- function(values) {
+  result <- paste("(1 - (1 -", paste("(1 -", values, ")", collapse = ") * (1 -"), "))", sep = ' ')
+  return(result)
+}
+
+## Store names as strings into their name as a variable
+component_variables <- list()
+
+for (name in words) {
+  name <- gsub("^\\s+|\\s+$", "", name)
+  component_variables[[name]] <- name
+}
+for (name in names(component_variables)) {
+  assign(name, component_variables[[name]])
+}
+##################################################################
+############# rewrite to fix subsystems ##########################
+##################################################################
+
+subsystem_names <- component_variables[(length(component_variables) - length(words) + 1):length(component_variables)]
+## Set up our series and parallel equations
+i = 1
+merging_function <- list()
+while (i <= length(text)) {
+  if (substr(text[i],1,1)%in%c("S", "s")) {
+    merging_function[[i]] <- comps.in.series(compNeeded[-length(compNeeded)])
+  } else { 
+    merging_function[[i]] <- comps.in.parallel(compNeeded[-length(compNeeded)])
+  }
+  i <- i + 1
+}
+# merging_function
+names(merging_function) <- subsystem_names
+
+replace_variables <- function(expression, values) {
+  for (var in names(values)) {
+    # Use \\b to match whole words only
+    expression <- gsub(paste0("\\b", var, "\\b"), values[[var]], expression)
+  }
+  return(expression)
+}
+
+for (name in names(merging_function)) {
+  merging_function[[name]] <- replace_variables(merging_function[[name]], merging_function)
+}
+
+}
 
