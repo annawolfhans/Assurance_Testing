@@ -1,3 +1,8 @@
+####### to do
+## Fix circular relationship warning check
+### Figure out merging_function input and output
+
+
 #### EXAMPLE FILE ####
 file <- textConnection(
 "BI2KE::PARALLEL:cost=$1999
@@ -40,6 +45,10 @@ assurance_testing_setup <- function(file){
 
 text <- suppressWarnings(readLines(file))
 if(length(text)==0)stop("Text file contained 0 elements")
+# text <- text[!grepl("^\\s*$", text)] #### make sure this line of text works with all warnings. it should... ####
+
+
+#### review where pasted them all together ####
 
 ## Checks to see if includes parallel or series relationship after::
 # CASE INSENSITIVE
@@ -55,6 +64,35 @@ for (sentence in text) {
 
 # Close the connection?
 # close(file)
+# PARALLEL <- character(0)
+# SERIES <- character(0)
+# 
+# is_parallel <- FALSE
+# is_series <- FALSE
+# 
+# lines <- strsplit(text, "\n")
+# 
+# for (line in text) {
+#   line_lower <- tolower(line)
+#   
+#   if ("::parallel" %in% line_lower) {
+#     is_parallel <- TRUE
+#     is_series <- FALSE
+#   } else if ("::series" %in% line_lower) {
+#     is_parallel <- FALSE
+#     is_series <- TRUE
+#   } else if (is_parallel) {
+#     component <- strsplit(line, ":")[[1]][1]
+#     PARALLEL <- c(PARALLEL, component)
+#   } else if (is_series) {
+#     component <- strsplit(line, ":")[[1]][1]
+#     SERIES <- c(SERIES, component)
+#   }
+# # }
+# 
+# cat("PARALLEL:", PARALLEL, "\n")
+# cat("SERIES:", SERIES, "\n")
+
 
 
 data <- data.frame(Word = character(0))
@@ -171,6 +209,10 @@ if(any(counts[countIndices]>2) | !all(counts[!countIndices]==1))
   stop("Component names must be unique on LHS of equations")
 
 ## Check for circular relationship
+
+############# this isn't working. not creating needsBuilt and compNeeded ########
+#################################################################################
+
 done<-rep(F, line_count)
 i=0
 oneChange=FALSE
@@ -182,7 +224,7 @@ while(any(!done)){
     oneChange=FALSE
   }
   if (done[i]) next
-  compNeeded <- words[i]
+  compNeeded <- words[1]
   Name<-compNeeded[length(compNeeded)]
   compNeeded<-compNeeded[-length(compNeeded)]
   if (all(compNeeded%in% ready)){
@@ -193,7 +235,14 @@ while(any(!done)){
   }
 }
 
+compNeeded <- words[1:line_count]
+ready
+words
+needsBuilt
 ## Series and parallel structure functions ##
+######## double check that this will work for more than 3 or 4 components #########
+###################################################################################
+
 comps.in.series <- function(values) {
   result <- paste("(", paste(values, collapse = " * "), ")", sep = ' ')
   return(result)
@@ -217,18 +266,39 @@ for (name in names(component_variables)) {
 ##################################################################
 ############# rewrite to fix subsystems ##########################
 ##################################################################
-
-subsystem_names <- component_variables[(length(component_variables) - length(words) + 1):length(component_variables)]
+line_count
+component_variables
+subsystem_names <- component_variables[1:line_count]
 ## Set up our series and parallel equations
+
+for (sentence in text) {
+  if (stringr::str_count(sentence, "::") == 1) {
+    if (!grepl("(?i)::(parallel|series)", sentence)) {
+      cat("Error: The sentence does not match the pattern: '", sentence, "'\n")
+      stop("Pattern not found in the sentence.")
+    }
+  }
+}
+
+for (sentence in text) {
+  print (sentence)
+}
+
 i = 1
 merging_function <- list()
-while (i <= length(text)) {
-  if (substr(text[i],1,1)%in%c("S", "s")) {
-    merging_function[[i]] <- comps.in.series(compNeeded[-length(compNeeded)])
+while (i <= line_count) {
+  if (stringr::str_count(sentence, "::") == 1) {
+  if (grepl("(?i)::series", sentence)) {
+    merging_function[[i]] <- comps.in.series(compNeeded[2:length(compNeeded)])
   } else { 
-    merging_function[[i]] <- comps.in.parallel(compNeeded[-length(compNeeded)])
+    merging_function[[i]] <- comps.in.parallel(compNeeded[2:length(compNeeded)])
   }
   i <- i + 1
+  }
+}
+
+while (i <= line_count){
+  
 }
 # merging_function
 names(merging_function) <- subsystem_names
@@ -246,4 +316,21 @@ for (name in names(merging_function)) {
 }
 
 }
-
+#### maybe use this guy?
+# output_strings <- list()
+# 
+# # code to replicate P( and S(
+# for (line in text) {
+#   line_lower <- tolower(line)
+#   if (grepl("::", line)) {
+#     match <- regmatches(line, gregexpr(".*(?=::)", line, perl = TRUE))
+#     if (length(match[[1]]) > 0) {
+#       if (grepl("parallel", line)) {
+#         output_strings <- append(output_strings, paste0("P(", match[[1]]))
+#       } else if (grepl("series", line)) {
+#         output_strings <- append(output_strings, paste0("S(", match[[1]]))
+#       }
+#     }
+#   }
+# }
+# output_strings
