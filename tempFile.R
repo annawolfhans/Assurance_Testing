@@ -1,19 +1,23 @@
 
 # Example usage with the provided input
-file <- textConnection(
-  "BI2KE::Series:cost=$1999
-  Tires: cost=$33
-  Brakes: cost=$45
+file <- textConnection("
+BI2KE::Series:cost=$1999
+  Tires:cost=$33
+  Brakes:cost=$45
 
   Tires::Series
-  BackTire: B(1,2), cost=$12
-  FrontTire: B(1,2), cost=$12
+  BackTire:B(1,2),cost=$12
+  FrontTire:B(1,2),cost=$12
   
   Brakes::parallel
-  FrontBrakes: B(3,2), cost=$12
-  BackBrakes: B(1,4), cost=$Inf
+  FrontBrakes:B(3,2),cost=$12
+  BackBrakes:B(1,4),cost=$Inf
 ")
+# Make sure to be very explicit with every space 
+# Ex: " On same line as BI2KE or " on line above 
+# Try both the textConnection and the text file, the quotation marks might make a difference maybe...just try both
 
+# Tell user it's okay to have spaces in between things if they'd like, it's built to remove them so it doesn't matter
 current_dir <- getwd()
 file_name <- "file.txt"  
 file_path <- file.path(current_dir, file_name)
@@ -257,9 +261,12 @@ BikeReliability <- function(BackTire, FrontTire, FrontBrakes, BackBrakes) {
 
 BikeReliability(BackTire = 0.8, FrontTire = 0.7, FrontBrakes = 0.5, BackBrakes = 0.6)
 
-# Maybe try putting a for loop? ready[i] through line_count?
+# Avoid for loop and try a vectorized function
+
 BikeReliability<- function(ready) {
   eval(parse(text = merging_function[1]))
 }
-
-
+vector <- c(0.8,0.7,0.5,0.6)
+ready
+BikeReliability(vector)
+# Try vectorized function to avoid a for loop 
