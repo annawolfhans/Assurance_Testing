@@ -1,18 +1,17 @@
 
 # Example usage with the provided input
-file <- textConnection("
-BI2KE::Series:cost=$1999
-  Tires:cost=$33
-  Brakes:cost=$45
+file <- textConnection(
+  "BI2KE::PARALLEL:cost=$1999
+Tires: cost=$33
+Brakes: cost=$45
 
-  Tires::Series
-  BackTire:B(1,2),cost=$12
-  FrontTire:B(1,2),cost=$12
-  
-  Brakes::parallel
-  FrontBrakes:B(3,2),cost=$12
-  BackBrakes:B(1,4),cost=$Inf
-")
+Tires::Series
+BackTire: B(1,2), cost=$12
+FrontTire: B(1,2), cost=$12
+
+Brakes::parallel
+FrontBrakes: B(3,2), cost=$12
+BackBrakes: B(1,4), cost=$Inf")
 # Make sure to be very explicit with every space 
 # Ex: " On same line as BI2KE or " on line above 
 # Try both the textConnection and the text file, the quotation marks might make a difference maybe...just try both
@@ -49,6 +48,8 @@ assurance_testing_setup <- function(file){
       }
     }
   }
+  
+
   
   # Extract words... make sure it works with remaining
   # data <- data.frame(Word = character(0))
@@ -250,11 +251,26 @@ assurance_testing_setup <- function(file){
   
   print(merging_function)
   
+  priorsExtract <- function(string) {
+    pattern <- "B\\((\\d+),(\\d+)\\)"
+    matches <- stringr::str_match_all(string, pattern)
+    if (length(matches) > 0) {
+      extracted_numbers <- matches[[1]][, 2:3]
+      return(extracted_numbers)
+    } else {
+      return(NULL)
+    }
+  }
+  text1 <- paste(text, collapse = " ")
+  priors <- priorsExtract(text1)
+  colnames(priors) <- c("alpha", "beta")
+  # priors
+  
 }
 
 
 #### OUTPUT NUMBERS ####
-
+#### didn't work section... ####
 BikeReliability <- function(BackTire, FrontTire, FrontBrakes, BackBrakes) {
   eval(parse(text = merging_function$BI2KE))
 }
@@ -263,10 +279,63 @@ BikeReliability(BackTire = 0.8, FrontTire = 0.7, FrontBrakes = 0.5, BackBrakes =
 
 # Avoid for loop and try a vectorized function
 
-BikeReliability<- function(ready) {
+BikeReliability<- function(input_vector) {
   eval(parse(text = merging_function[1]))
 }
 vector <- c(0.8,0.7,0.5,0.6)
 ready
-BikeReliability(vector)
-# Try vectorized function to avoid a for loop 
+BikeReliability(input_vector)
+# Try vectorized function to avoid a for loop ?
+
+BikeReliability <- function(BackTire, FrontTire, FrontBrakes, BackBrakes) {
+  eval(parse(text = merging_function$BI2KE))
+}
+
+# Function to evaluate the merging function with a vector input
+VectorizedBikeReliability <- Vectorize(BikeReliability, vectorize.args = c("BackTire", "FrontTire", "FrontBrakes", "BackBrakes"))
+
+# Input vector testing testing 
+input_vector <- list(BackTire = 0.8, FrontTire = 0.7, FrontBrakes = 0.5, BackBrakes = 0.6)
+
+# Evaluate the function with the input vector
+result <- VectorizedBikeReliability(BackTire = input_vector$BackTire, FrontTire = input_vector$FrontTire, FrontBrakes = input_vector$FrontBrakes, BackBrakes = input_vector$BackBrakes)
+result
+
+
+
+BikeReliability <- function(BackTire, FrontTire, BackBrake, FrontBrake
+){
+  eval(parse(text = merging_function$Bike))
+}
+
+evaluate <- setdiff(words, compNeeded)
+BikeReliability(BackTire = 0.8, FrontTire = 0.7, BackBrake=.6, FrontBrake=.5)
+
+# lines below should become irrelevant 
+stored <- list()
+i <- 1  
+while (i <= length(evaluate)) {
+  stored[[i]] <- paste0(evaluate[i], "=", alpha[i])
+  i <- i + 1  
+}
+# Right now, it's just putting in alpha but it is outputting a number which is good!! 
+result <- paste("BikeReliability(", paste(stored, collapse = ", "), ")")
+eval(parse(text = result))
+
+
+
+
+######## this takes in a vector, assigns it to ######
+
+vector <- c(0.8,0.7,0.5,0.6)
+ready
+variables <- setNames(vector, ready)
+variables
+evaluate_sys <- merging_function[1]
+
+for (var in names(variables)) {
+  evaluate_sys <- gsub(var, as.character(variables[var]), evaluate_sys)
+}
+
+result <- eval(parse(text = evaluate_sys))
+print(result)
