@@ -1,5 +1,7 @@
 
 # Example usage with the provided input
+
+# Either beginning on same line as textConnection or newline works with code
 file <- textConnection(
   "BI2KE::PARALLEL:cost=$1999
 Tires: cost=$33
@@ -12,6 +14,19 @@ FrontTire: B(1,2), cost=$12
 Brakes::series
 FrontBrakes: B(3,2), cost=$12
 BackBrakes: B(1,4), cost=$Inf")
+
+file <- textConnection("BI2KE::PARALLEL:cost=$1999
+Tires: cost=$33
+Brakes: cost=$45
+
+Tires::Series
+BackTire: B(1,2), cost=$12
+FrontTire: B(1,2), cost=$12
+
+Brakes::series
+FrontBrakes: B(3,2), cost=$12
+BackBrakes: B(1,4), cost=$Inf") 
+
 # Make sure to be very explicit with every space 
 # Ex: " On same line as BI2KE or " on line above 
 # Try both the textConnection and the text file, the quotation marks might make a difference maybe...just try both
@@ -221,7 +236,7 @@ assurance_testing_setup <- function(file){
     return(result)
   }
   
-  aggregated_outputs <- gsub("\\s+", "", aggregated_outputs)
+  aggregated_outputs <- gsub("\\s+", "", aggregated_outputs) ### line relies on spacing? check
   
   i = 1
   merging_function <- list()
