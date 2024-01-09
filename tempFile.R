@@ -9,7 +9,7 @@ Tires::Series
 BackTire: B(1,2), cost=$12
 FrontTire: B(1,2), cost=$12
 
-Brakes::parallel
+Brakes::series
 FrontBrakes: B(3,2), cost=$12
 BackBrakes: B(1,4), cost=$Inf")
 # Make sure to be very explicit with every space 
@@ -216,7 +216,8 @@ assurance_testing_setup <- function(file){
   }
   
   comps.in.parallel <- function(values) {
-    result <- paste("(1 - (1 -", paste("(1 -", values, ")", collapse = ") * (1 -"), "))", sep = ' ')
+    result <- paste("(1 - ", paste("(1 -", compNeeded[-1], ")", collapse = " * "), paste( ")"), sep = ' ')
+    # result <- paste("(1 - (1 -", paste("(1 -", values, ")", collapse = ") * (1 -"), "))", sep = ' ')
     return(result)
   }
   
@@ -264,8 +265,33 @@ assurance_testing_setup <- function(file){
   text1 <- paste(text, collapse = " ")
   priors <- priorsExtract(text1)
   colnames(priors) <- c("alpha", "beta")
+  
+  priors_alpha <- as.numeric(priors[,1])
+  priors_beta <- as.numeric(priors[,2])
   # priors
   
+  #### EXTRACT COST ####
+  costExtract <- function(string) {
+    pattern <- "\\$([0-9]+|Inf)"
+    matches <- stringr::str_match_all(string, pattern)
+    
+    if (length(matches) > 0) {
+      extracted_numbers <- as.numeric(matches[[1]][, 2])
+      return(extracted_numbers)
+    } else {
+      stop("No cost values were found. Check costs formatting.")
+    }
+  }
+
+  costs <- costExtract(text1)
+  sys_only_price <- costs[1]
+  ## First cost should be sys_only_price
+  prices <- costs[-1]
+  return(merging_function)
+  return(costs)
+  return(prices)
+  return(sys_only_price)
+  return(priors)
 }
 
 
